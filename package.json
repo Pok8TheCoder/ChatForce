@@ -1,0 +1,19 @@
+{
+  "name": "insightforge",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "python3 scripts/run_api.py",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=apps/web",
+    "test:api": "pytest tests/unit -q",
+    "test:e2e": "echo 'E2E tests coming in Phase 12'"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
