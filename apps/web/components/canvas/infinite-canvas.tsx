@@ -4,6 +4,7 @@ import {
   Background,
   BackgroundVariant,
   Controls,
+  MarkerType,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
@@ -20,6 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { CanvasObjectType, WorkspaceState } from "@/lib/types";
 import { nodeTypes } from "./canvas-object-node";
+import { CanvasToolbar, type CanvasTool } from "./canvas-toolbar";
 import { ContextMenu, type ContextMenuState } from "./context-menu";
 
 interface InfiniteCanvasProps {
@@ -47,19 +49,34 @@ function workspaceToNodes(workspace: WorkspaceState): Node[] {
 }
 
 function workspaceToEdges(workspace: WorkspaceState): Edge[] {
-  return workspace.connections.map((conn) => ({
-    id: conn.id,
-    source: conn.source_id,
-    target: conn.target_id,
-    animated: false,
-    style: { stroke: "#a3a3a3", strokeWidth: 1.5 },
-  }));
+  return workspace.connections.map((conn) => {
+    const isArrow = conn.label === "→";
+    return {
+      id: conn.id,
+      source: conn.source_id,
+      target: conn.target_id,
+      animated: isArrow,
+      label: conn.label || undefined,
+      style: {
+        stroke: isArrow ? "#2563eb" : "#737373",
+        strokeWidth: isArrow ? 2 : 1.5,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: isArrow ? "#2563eb" : "#737373",
+        width: 16,
+        height: 16,
+      },
+    };
+  });
 }
 
 function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: InfiniteCanvasProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [activeTool, setActiveTool] = useState<CanvasTool>("select");
+  const [connectSourceId, setConnectSourceId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetRef = useRef<string | null>(null);
   const { fitView, screenToFlowPosition } = useReactFlow();
@@ -89,6 +106,59 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
     setNodes(workspaceToNodes(workspace));
     setEdges(workspaceToEdges(workspace));
   }, [workspace, setNodes, setEdges]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      if (e.key === "Escape") {
+        setConnectSourceId(null);
+        if (activeTool === "connect" || activeTool === "arrow") setActiveTool("select");
+      }
+      if (e.key === "v" && !e.metaKey && !e.ctrlKey) setActiveTool("select");
+      if (e.key === "c" && !e.metaKey && !e.ctrlKey) setActiveTool("connect");
+      if (e.key === "a" && !e.metaKey && !e.ctrlKey) setActiveTool("arrow");
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeTool]);
+
+  const handleToolChange = useCallback((tool: CanvasTool) => {
+    setActiveTool(tool);
+    setConnectSourceId(null);
+  }, []);
+
+  const connectHint = useMemo(() => {
+    if (activeTool !== "connect" && activeTool !== "arrow") return null;
+    if (!connectSourceId) return "Step 1: click the source object";
+    const source = workspace.objects.find((o) => o.id === connectSourceId);
+    const label = (source?.data.label as string) || "object";
+    return `Step 2: click target to connect from "${label}"`;
+  }, [activeTool, connectSourceId, workspace.objects]);
+
+  const handleNodeClick = useCallback(
+    async (_event: React.MouseEvent, node: Node) => {
+      if (activeTool !== "connect" && activeTool !== "arrow") return;
+
+      if (!connectSourceId) {
+        setConnectSourceId(node.id);
+        return;
+      }
+
+      if (connectSourceId === node.id) {
+        setConnectSourceId(null);
+        return;
+      }
+
+      await applyCommand("CONNECT", {
+        source_id: connectSourceId,
+        target_id: node.id,
+        label: activeTool === "arrow" ? "→" : undefined,
+      });
+      setConnectSourceId(null);
+    },
+    [activeTool, connectSourceId, applyCommand],
+  );
 
   const handleConnect = useCallback(
     async (connection: FlowConnection) => {
@@ -228,17 +298,26 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
         ...node,
         data: {
           ...node.data,
+          isConnectSource: connectSourceId === node.id,
           onUpload: () => {
             uploadTargetRef.current = node.id;
             fileInputRef.current?.click();
           },
         },
+        draggable: activeTool === "select",
       })),
-    [nodes],
+    [nodes, connectSourceId, activeTool],
   );
 
   return (
-    <div className="relative h-full w-full bg-[#f8f9fb]">
+    <div className="relative flex h-full w-full flex-col bg-[#f8f9fb]">
+      <CanvasToolbar
+        activeTool={activeTool}
+        onToolChange={handleToolChange}
+        connectHint={connectHint}
+        onZoomFit={() => fitView({ padding: 0.2 })}
+      />
+      <div className="relative flex-1">
       <input
         ref={fileInputRef}
         type="file"
@@ -252,7 +331,11 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
         onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={handleConnect}
+        onNodeClick={handleNodeClick}
+        nodesConnectable={activeTool === "select"}
+        elementsSelectable={activeTool === "select"}
         onNodeDragStop={(_event, node) => {
+          if (activeTool !== "select") return;
           void applyCommand("MOVE_OBJECT", {
             object_id: node.id,
             position: node.position,
@@ -264,6 +347,7 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
         fitView
         minZoom={0.2}
         maxZoom={2}
+        className={activeTool === "connect" || activeTool === "arrow" ? "cursor-crosshair" : undefined}
         defaultViewport={{
           x: workspace.viewport.x,
           y: workspace.viewport.y,
@@ -283,6 +367,7 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
         onClose={() => setContextMenu(null)}
         onAction={handleContextAction}
       />
+      </div>
     </div>
   );
 }

@@ -49,19 +49,26 @@ export interface CanvasNodeData {
   meta?: string[];
   empty?: boolean;
   onUpload?: () => void;
+  isConnectSource?: boolean;
   [key: string]: unknown;
 }
 
 export function CanvasObjectNode({ data, selected }: NodeProps) {
   const nodeData = data as CanvasNodeData;
   const Icon = ICONS[nodeData.objectType] || Database;
+  const isConnectSource = nodeData.isConnectSource;
+  const highlightClass = isConnectSource
+    ? "border-emerald-500 ring-2 ring-emerald-200"
+    : selected
+      ? "border-blue-500 ring-2 ring-blue-200"
+      : "border-neutral-200";
 
   if (nodeData.objectType === "dataset") {
     return (
       <div
         className={cn(
           "min-w-[260px] rounded-2xl border bg-white shadow-sm transition-shadow",
-          selected ? "border-blue-500 ring-2 ring-blue-200" : "border-neutral-200",
+          highlightClass,
         )}
       >
         <Handle type="source" position={Position.Right} className="!bg-neutral-400" />
@@ -102,7 +109,7 @@ export function CanvasObjectNode({ data, selected }: NodeProps) {
     <div
       className={cn(
         "min-w-[200px] rounded-2xl border bg-white shadow-sm",
-        selected ? "border-blue-500 ring-2 ring-blue-200" : "border-neutral-200",
+        highlightClass,
       )}
     >
       <Handle type="target" position={Position.Left} className="!bg-neutral-400" />
