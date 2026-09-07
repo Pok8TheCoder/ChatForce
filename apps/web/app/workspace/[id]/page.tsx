@@ -37,7 +37,7 @@ export default function WorkspacePage() {
 
   if (isLoading || !workspace) {
     return (
-      <div className="flex h-screen items-center justify-center text-neutral-500">
+      <div className="flex h-screen items-center justify-center text-muted-foreground">
         {error ? "Workspace not found" : "Loading workspace..."}
       </div>
     );
@@ -47,9 +47,9 @@ export default function WorkspacePage() {
     <div className="flex h-screen overflow-hidden">
       <WorkspaceSidebar activeWorkspaceId={workspaceId} />
       <main className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3">
-          <h1 className="text-sm font-semibold text-neutral-900">{workspace.title}</h1>
-          <span className="text-xs text-neutral-400">
+        <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3">
+          <h1 className="text-sm font-semibold text-foreground">{workspace.title}</h1>
+          <span className="text-xs text-muted-foreground">
             {workspace.objects.length} objects · {workspace.connections.length} connections
           </span>
         </header>

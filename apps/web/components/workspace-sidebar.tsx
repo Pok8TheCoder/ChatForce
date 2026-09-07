@@ -38,13 +38,13 @@ export function WorkspaceSidebar({ activeWorkspaceId }: WorkspaceSidebarProps) {
   });
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-neutral-200 bg-white">
-      <div className="flex items-center justify-between border-b border-neutral-200 px-4 py-4">
+    <aside className="flex h-full w-64 flex-col border-r border-border bg-card">
+      <div className="flex items-center justify-between border-b border-border px-4 py-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Workspaces
           </p>
-          <h2 className="text-sm font-semibold text-neutral-900">InsightForge</h2>
+          <h2 className="text-sm font-semibold text-foreground">InsightForge</h2>
         </div>
         <Button
           size="icon"
@@ -59,29 +59,29 @@ export function WorkspaceSidebar({ activeWorkspaceId }: WorkspaceSidebarProps) {
 
       <div className="flex-1 overflow-y-auto p-2">
         {isLoading && (
-          <p className="px-2 py-4 text-xs text-neutral-400">Loading...</p>
+          <p className="px-2 py-4 text-xs text-muted-foreground">Loading...</p>
         )}
         {!isLoading && workspaces.length === 0 && (
-          <p className="px-2 py-4 text-xs text-neutral-400">No workspaces yet</p>
+          <p className="px-2 py-4 text-xs text-muted-foreground">No workspaces yet</p>
         )}
         {workspaces.map((ws) => (
           <div
             key={ws.id}
             className={cn(
               "group mb-1 flex items-center gap-2 rounded-lg px-2 py-2",
-              activeWorkspaceId === ws.id ? "bg-neutral-100" : "hover:bg-neutral-50",
+              activeWorkspaceId === ws.id ? "bg-muted" : "hover:bg-muted/50",
             )}
           >
-            <MessageSquare className="h-4 w-4 shrink-0 text-neutral-400" />
+            <MessageSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
             <Link
               href={`/workspace/${ws.id}`}
-              className="flex-1 truncate text-sm text-neutral-700"
+              className="flex-1 truncate text-sm text-foreground"
             >
               {ws.title}
             </Link>
             <button
               type="button"
-              className="hidden rounded p-1 text-neutral-400 hover:bg-neutral-200 hover:text-red-500 group-hover:block"
+              className="hidden rounded p-1 text-muted-foreground hover:bg-accent hover:text-red-500 group-hover:block"
               onClick={() => {
                 if (confirm("Delete this workspace?")) deleteMutation.mutate(ws.id);
               }}

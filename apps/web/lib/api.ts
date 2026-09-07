@@ -72,4 +72,52 @@ export const api = {
     request<UploadResponse["profile"]>(
       `/api/datasets/${datasetId}/profile?workspace_id=${workspaceId}`,
     ),
+
+  listLlmPresets: () => request<LlmPreset[]>("/api/llm/presets"),
+
+  getLlmConfig: () => request<LlmConfig>("/api/llm/config"),
+
+  updateLlmConfig: (body: LlmConfigUpdate) =>
+    request<LlmConfig>("/api/llm/config", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+
+  testLlmConnection: () =>
+    request<{ ok: boolean; message: string; model: string | null }>("/api/llm/test", {
+      method: "POST",
+    }),
+
+  llmChat: (message: string, context?: Record<string, unknown>) =>
+    request<{ message: string; provider: string; model: string | null }>("/api/llm/chat", {
+      method: "POST",
+      body: JSON.stringify({ message, context }),
+    }),
 };
+
+export interface LlmPreset {
+  id: string;
+  name: string;
+  provider: string;
+  description: string;
+  base_url: string;
+  default_model: string;
+  requires_api_key: boolean;
+}
+
+export interface LlmConfig {
+  preset_id: string;
+  provider: string;
+  base_url: string;
+  api_key: string;
+  api_key_set: boolean;
+  model: string;
+  enabled: boolean;
+}
+
+export interface LlmConfigUpdate {
+  preset_id: string;
+  base_url?: string;
+  api_key?: string;
+  model?: string;
+}

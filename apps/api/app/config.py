@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     data_dir: Path = Path("./data")
     max_upload_size_mb: int = 100
     llm_provider: str = "none"
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = ""
+    llm_base_url: str = ""
+    llm_api_key: str = ""
+    llm_model: str = ""
     cors_origins: list[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
     @property

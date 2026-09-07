@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function HomePage() {
   const router = useRouter();
@@ -32,18 +33,21 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f8f9fb] px-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-6">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-lg text-center">
-        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium text-white">
+        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
           <Sparkles className="h-3 w-3" />
           InsightForge
         </div>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight text-neutral-900">
+        <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground">
           Drop in data.
           <br />
           Build the story automatically.
         </h1>
-        <p className="mt-4 text-neutral-600">
+        <p className="mt-4 text-muted-foreground">
           Upload an unfamiliar spreadsheet and get an explainable visual analytical workspace —
           editable by hand, controllable by AI.
         </p>
@@ -75,7 +79,7 @@ export default function HomePage() {
         </div>
 
         {createMutation.isError && (
-          <p className="mt-4 text-sm text-red-600">
+          <p className="mt-4 text-sm text-red-600 dark:text-red-400">
             {createMutation.error instanceof Error
               ? createMutation.error.message
               : "Something went wrong"}

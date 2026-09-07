@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  Background,
-  BackgroundVariant,
   Controls,
   MarkerType,
   MiniMap,
@@ -21,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { CanvasObjectType, WorkspaceState } from "@/lib/types";
 import { nodeTypes } from "./canvas-object-node";
+import { CanvasGrid } from "./canvas-grid";
 import { CanvasToolbar, type CanvasTool } from "./canvas-toolbar";
 import { ContextMenu, type ContextMenuState } from "./context-menu";
 
@@ -310,7 +309,7 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
   );
 
   return (
-    <div className="relative flex h-full w-full flex-col bg-[#f8f9fb]">
+    <div className="relative flex h-full w-full flex-col bg-canvas-bg">
       <CanvasToolbar
         activeTool={activeTool}
         onToolChange={handleToolChange}
@@ -354,7 +353,7 @@ function InfiniteCanvasInner({ workspace, onWorkspaceChange, onPointToAi }: Infi
           zoom: workspace.viewport.zoom,
         }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#d4d4d8" />
+        <CanvasGrid />
         <Controls showInteractive={false} />
         <MiniMap
           nodeColor="#e5e7eb"
