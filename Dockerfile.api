@@ -1,0 +1,19 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt pyproject.toml ./
+COPY packages/analysis-engine ./packages/analysis-engine
+COPY apps/api ./apps/api
+COPY scripts/run_api.py ./scripts/run_api.py
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+ENV PYTHONPATH=/app/apps/api:/app/packages/analysis-engine
+ENV API_HOST=0.0.0.0
+ENV API_PORT=8765
+ENV DATA_DIR=/app/data
+
+EXPOSE 8765
+
+CMD ["python", "scripts/run_api.py"]

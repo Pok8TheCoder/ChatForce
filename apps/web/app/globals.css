@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8f9fb;
+  --foreground: #171717;
+  --card: #ffffff;
+  --card-foreground: #171717;
+  --border: #e5e5e5;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --accent: #f0f0f0;
+  --accent-foreground: #171717;
+  --primary: #171717;
+  --primary-foreground: #fafafa;
+  --canvas-bg: #f8f9fb;
+  --canvas-grid: #d4d4d8;
+  --canvas-grid-major: #a3a3a3;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #ededed;
+  --card: #141416;
+  --card-foreground: #ededed;
+  --border: #27272a;
+  --muted: #1c1c1f;
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a;
+  --accent-foreground: #ededed;
+  --primary: #ededed;
+  --primary-foreground: #0a0a0b;
+  --canvas-bg: #0e0e10;
+  --canvas-grid: #2a2a2e;
+  --canvas-grid-major: #3f3f46;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+/* React Flow dark mode overrides */
+.dark .react-flow__controls {
+  background: var(--card);
+  border-color: var(--border);
+}
+.dark .react-flow__controls-button {
+  background: var(--card);
+  border-color: var(--border);
+  fill: var(--foreground);
+}
+.dark .react-flow__controls-button:hover {
+  background: var(--muted);
+}
+.dark .react-flow__minimap {
+  background: var(--card);
+}
